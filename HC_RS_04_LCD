@@ -1,0 +1,51 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <NewPing.h>
+
+// HC-SR04 sensor pins
+#define TRIGGER_PIN  D5
+#define ECHO_PIN     D6
+#define MAX_DISTANCE 400 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
+
+// Create instance for the ultrasonic sensor
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+
+// Create instance for the LCD 1602 display
+LiquidCrystal_I2C lcd(0x27, 16, 2); // Adjust the address (0x27) if needed
+
+void setup() {
+  Serial.begin(115200);
+  lcd.init(); // Initialize the LCD
+  lcd.backlight(); // Turn on the backlight
+}
+
+void loop() {
+  // Measure distance
+  int distanceCM = sonar.ping_cm();
+
+  lcd.clear(); // Clear the LCD screen
+  if (distanceCM < 100) {
+    // Display distance in centimeters
+    Serial.print("Ping: ");
+    Serial.print(distanceCM);
+    Serial.println(" cm");
+    lcd.setCursor(0, 0); // Set cursor to the first column, first row
+    lcd.print("Distance: ");
+    lcd.setCursor(0, 1); // Set cursor to the first column, second row
+    lcd.print(distanceCM);
+    lcd.print(" cm");
+  } else {
+    // Display distance in meters
+    float distanceM = distanceCM / 100.0;
+    Serial.print("Ping: ");
+    Serial.print(distanceM, 2); // Print two decimal places for meters
+    Serial.println(" m");
+    lcd.setCursor(0, 0); // Set cursor to the first column, first row
+    lcd.print("Distance: ");
+    lcd.setCursor(0, 1); // Set cursor to the first column, second row
+    lcd.print(distanceM, 2);
+    lcd.print(" m");
+  }
+
+  delay(500); // Delay to avoid rapid updates
+}
